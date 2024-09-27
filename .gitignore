@@ -29,3 +29,6 @@ temp/
 
 # Windows specific files
 Thumbs.db
+
+# Other files
+locals/
