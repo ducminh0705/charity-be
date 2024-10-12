@@ -12,6 +12,7 @@ class User extends Model {
   public isVerified!: boolean;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+  additionalApproval?: 'NOT_NEEDED' | 'PENDING' | 'APPROVED';
 }
 
 User.init(
@@ -24,15 +25,18 @@ User.init(
     firstName: {
       type: DataTypes.STRING(255),
       allowNull: false,
+      field: 'first_name',
     },
     lastName: {
       type: DataTypes.STRING(255),
       allowNull: false,
+      field: 'last_name',
     },
     phoneNumber: {
       type: DataTypes.STRING(20),
       allowNull: false,
       unique: true,
+      field: 'phone_number',
     },
     email: {
       type: DataTypes.STRING(255),
@@ -49,22 +53,30 @@ User.init(
     isVerified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+      field: 'is_verified',
+    },
+    additionalApproval: {
+      type: DataTypes.ENUM('NOT_NEEDED', 'PENDING', 'APPROVED'),
+      defaultValue: 'NOT_NEEDED',
+      field: 'additional_approval',
     },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+      field: 'created_at',
     },
     updatedAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+      field: 'updated_at',
     },
   },
   {
     sequelize,
     tableName: 'users',
     timestamps: true,
-    updatedAt: 'updatedAt',
-    createdAt: 'createdAt',
+    updatedAt: 'updated_at',
+    createdAt: 'created_at',
   }
 );
 

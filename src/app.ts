@@ -3,6 +3,13 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes';
 import { Sequelize } from 'sequelize';
+import donationRoutes from './routes/donationRoutes';
+import campaignRoutes from './routes/campaignRoutes';
+import reportRoutes from './routes/reportRoutes';
+import paymentInfoRoutes from './routes/paymentInfoRoutes';
+import feedbackRoutes from './routes/feedbackRoutes';
+
+
 
 // Initialize Sequelize
 const sequelize = new Sequelize('charity', 'root', 'admin', {
@@ -28,5 +35,10 @@ app.use(cookieParser());
 
 // Routes
 app.use('', authRoutes);
+app.use('/api/donations', donationRoutes);
+app.use('/api/campaigns', campaignRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/payment-info', paymentInfoRoutes);
+app.use('/api/feedbacks', feedbackRoutes);
 
 export default app;

@@ -15,6 +15,8 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const additionalApproval = role === 'charity_org' ? 'PENDING' : 'NOT_NEEDED';
+
     const user = await User.create({
       phoneNumber,
       password: hashedPassword,
@@ -22,6 +24,7 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
       lastName,
       email,
       role,
+      additionalApproval,
     });
 
     // Tạo mã OTP
@@ -89,20 +92,27 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
       return;
     }
 
-    if (!user.isVerified) {
+    if (user.role === 'charity_org') {
+      if (!user.isVerified || user.additionalApproval !== 'APPROVED') {
+      res.status(400).json({ message: 'Tài khoản chưa được xác thực hoặc giấy phép kinh doanh chưa được duyệt' });
+      return;
+      }
+    } else {
+      if (!user.isVerified) {
       res.status(400).json({ message: 'Tài khoản chưa được xác minh' });
       return;
+      }
     }
 
     const accessToken = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET || 'your_secret_key',
+      process.env.JWT_SECRET || 'secret_key',
       { expiresIn: `${process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 15}m` }
     );
 
     const refreshToken = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET || 'your_secret_key',
+      process.env.JWT_SECRET || 'secret_key',
       { expiresIn: `${process.env.REFRESH_TOKEN_EXPIRE_DAYS || 7}d` }
     );
 

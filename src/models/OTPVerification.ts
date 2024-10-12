@@ -26,18 +26,22 @@ OTPVerification.init(
       },
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
+      field: 'user_id',
     },
     otpCode: {
       type: DataTypes.STRING(6),
       allowNull: false,
+      field: 'otp_code',
     },
     expiresAt: {
       type: DataTypes.DATE,
       allowNull: false,
+      field: 'expires_at',
     },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+      field: 'created_at',
     },
   },
   {

@@ -72,7 +72,7 @@ router.post('/login', loginUser);
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               phoneNumber:
  *                 type: string
  *               password:
  *                 type: string
@@ -83,6 +83,21 @@ router.post('/login', loginUser);
  *         description: Bad request
  */
 router.post('/refresh-token', refreshToken);
-// router.get('/me', authenticateToken, getCurrentUser);
+
+/**
+ * @swagger
+ * /me:
+ *   get:
+ *     summary: Get current user
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user retrieved successfully
+ *       400:
+ *         description: Bad request
+ */
+router.get('/me', authenticateToken, getCurrentUser);
 
 export default router;
