@@ -1,5 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/database';
+import CharityOrganization from './CharityOrganization';
 
 class CharityCampaign extends Model {
   public id!: number;
@@ -81,5 +82,8 @@ CharityCampaign.init(
     timestamps: true,
   }
 );
+
+CharityOrganization.hasMany(CharityCampaign, { foreignKey: 'charity_org_id' });
+CharityCampaign.belongsTo(CharityOrganization, { foreignKey: 'charity_org_id' });
 
 export default CharityCampaign;

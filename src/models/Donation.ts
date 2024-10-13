@@ -15,6 +15,7 @@ class Donation extends Model {
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+  public User?: User;
 }
 
 Donation.init(
@@ -85,5 +86,7 @@ Donation.init(
     timestamps: true,
   }
 );
+
+Donation.belongsTo(User, { foreignKey: 'userId', as: 'User' });
 
 export default Donation;

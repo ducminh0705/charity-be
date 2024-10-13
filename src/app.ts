@@ -35,10 +35,10 @@ app.use(cookieParser());
 
 // Routes
 app.use('', authRoutes);
-app.use('/api/donations', donationRoutes);
-app.use('/api/campaigns', campaignRoutes);
-app.use('/api/reports', reportRoutes);
-app.use('/api/payment-info', paymentInfoRoutes);
-app.use('/api/feedbacks', feedbackRoutes);
+app.use('/donations', donationRoutes);
+app.use('/campaigns', campaignRoutes);
+app.use('/reports', reportRoutes);
+app.use('/payment-info', paymentInfoRoutes);
+app.use('/feedbacks', feedbackRoutes);
 
 export default app;
