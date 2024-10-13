@@ -1,5 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/database';
+import User from './User';
 
 class CharityOrganization extends Model {
   public id!: number;
@@ -60,5 +61,8 @@ CharityOrganization.init(
     timestamps: true,
   }
 );
+
+CharityOrganization.belongsTo(User, { foreignKey: 'userId' });
+User.hasOne(CharityOrganization, { foreignKey: 'userId' });
 
 export default CharityOrganization;

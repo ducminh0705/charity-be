@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import OTPVerification from '../models/OTPVerification';
 import User from '../models/User';
 import { sendOTP } from '../utils/sms';
+import CharityOrganization from '../models/CharityOrganization';
+import { Sequelize, Op } from 'sequelize';
 
 export const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { phoneNumber, password, firstName, lastName, email, role } = req.body;
@@ -40,6 +42,76 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
   } catch (err) {
     // res.status(500).json({ message: 'Đã xảy ra lỗi' });
     next(err);
+  }
+};
+
+export const registerCharityOrg = async (req: Request, res: Response): Promise<void> => {
+  const {
+    phoneNumber,
+    password,
+    firstName,
+    lastName,
+    email,
+    organizationName,
+    licenseDocument,
+    birthDate,
+  } = req.body;
+
+  if (
+    !phoneNumber ||
+    !password ||
+    !firstName ||
+    !lastName ||
+    !email ||
+    !organizationName ||
+    !licenseDocument ||
+    !birthDate
+  ) {
+    res.status(400).json({ message: 'Missing required fields' });
+    return;
+  }
+
+  try {
+    const existingUser = await User.findOne({
+      where: {
+        [Op.or]: [{ phoneNumber }, { email }],
+      },
+    });
+
+    if (existingUser) {
+      res.status(409).json({ message: 'Phone number or email already in use' });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      phoneNumber,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      email,
+      role: 'charity_org',
+      isVerified: false,
+      birthDate,
+      additionalApproval: 'PENDING',
+    });
+
+    const charityOrg = await CharityOrganization.create({
+      userId: user.id,
+      organizationName,
+      licenseDocument,
+      isApproved: false,
+    });
+
+    res.status(201).json({
+      message: 'Charity organization registered successfully',
+      userId: user.id,
+      charityOrgId: charityOrg.id,
+    });
+  } catch (error) {
+    console.error('Error registering charity organization:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 

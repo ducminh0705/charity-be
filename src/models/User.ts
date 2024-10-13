@@ -10,6 +10,7 @@ class User extends Model {
   public password!: string;
   public role!: 'donor' | 'charity_org' | 'recipient' | 'admin';
   public isVerified!: boolean;
+  public birthDate!: Date;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   additionalApproval?: 'NOT_NEEDED' | 'PENDING' | 'APPROVED';
@@ -54,6 +55,11 @@ User.init(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       field: 'is_verified',
+    },
+    birthDate: {
+      type: DataTypes.DATEONLY, 
+      allowNull: true, 
+      field: 'birth_date',
     },
     additionalApproval: {
       type: DataTypes.ENUM('NOT_NEEDED', 'PENDING', 'APPROVED'),
