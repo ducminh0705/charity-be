@@ -6,6 +6,7 @@ import donationRoutes from './routes/donationRoutes';
 import campaignRoutes from './routes/campaignRoutes';
 import reportRoutes from './routes/reportRoutes';
 import paymentInfoRoutes from './routes/paymentInfoRoutes';
+import expenseRoutes from './routes/expenseRoutes';
 import feedbackRoutes from './routes/feedbackRoutes';
 import sequelize from './config/database';
 
@@ -31,6 +32,7 @@ app.use('', authRoutes);
 app.use('/donations', donationRoutes);
 app.use('/campaigns', campaignRoutes);
 app.use('/reports', reportRoutes);
+app.use('/expenses', expenseRoutes);
 app.use('/payment-info', paymentInfoRoutes);
 app.use('/feedbacks', feedbackRoutes);
 

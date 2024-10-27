@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { createDonation, getPendingDonation, updateDonationStatus } from '../controllers/donationController';
+import { createDonation, updateDonationStatus, getDonations } from '../controllers/donationController';
 import { authenticateToken } from '../middlewares/auth';
 
 const router = Router();
 
 /**
  * @swagger
- * /donations:
+ * /donations/create:
  *   post:
  *     summary: Tạo một khoản quyên góp mới
  *     tags: [Donations]
@@ -37,32 +37,42 @@ const router = Router();
  *       500:
  *         description: Đã xảy ra lỗi
  */
-router.post('/', authenticateToken, createDonation);
+router.post('/create', authenticateToken, createDonation);
 
 /**
  * @swagger
- * /donations/pending:
+ * /donations:
  *   get:
- *     summary: Retrieve all pending donations
+ *     summary: Retrieve a list of donations
  *     tags: [Donations]
- *     security:
- *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, completed, failed]
+ *         description: Filter donations by status
  *     responses:
  *       200:
- *         description: A list of pending donations
+ *         description: A list of donations
  *         content:
  *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *       400:
+ *         description: Invalid status value
  *       403:
  *         description: Forbidden
  *       500:
  *         description: Internal server error
  */
-router.get('/', authenticateToken, getPendingDonation);
+router.get('/', authenticateToken, getDonations);
 
 /**
  * @swagger
- * /donations/status:
- *   patch:
+ * /donations/update-status:
+ *   put:
  *     summary: Cập nhật trạng thái của khoản quyên góp
  *     tags: [Donations]
  *     requestBody:
@@ -89,7 +99,7 @@ router.get('/', authenticateToken, getPendingDonation);
  *       500:
  *         description: Đã xảy ra lỗi
  */
-router.put('/', authenticateToken, updateDonationStatus);
+router.put('/update-status', authenticateToken, updateDonationStatus);
 
 
 

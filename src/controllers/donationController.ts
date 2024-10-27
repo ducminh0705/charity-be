@@ -23,23 +23,35 @@ export const createDonation = async (req: Request, res: Response): Promise<void>
       transactionId: null,
       status: 'pending',
     });
+
+    campaign.currentAmount = campaign.currentAmount + amount;
+    await campaign.save();
+
+    res.status(201).json({ message: 'Đóng góp thành công' });
   } catch (err) {
     res.status(500).json({ message: 'Đã xảy ra lỗi' });
     return;
   }
 };
 
-export const getPendingDonation = async (req: Request, res: Response): Promise<void> => {
+export const getDonations = async (req: Request, res: Response): Promise<void> => {
   const user = (req as any).user as User;
+  const { status } = req.query;
 
   if (user.role !== 'admin') {
     res.status(403).json({ message: 'Bạn không có quyền truy cập' });
-    return
+    return;
+  }
+
+  if (status && !['pending', 'completed', 'failed'].includes(status as string)) {
+    res.status(400).json({ message: 'Trạng thái không hợp lệ' });
+    return;
   }
 
   try {
-    const pendingDonations = await Donation.findAll({ where: { status: 'pending' } });
-    res.status(200).json(pendingDonations);
+    const whereClause = status ? { status } : {};
+    const donations = await Donation.findAll({ where: whereClause });
+    res.status(200).json(donations);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Đã xảy ra lỗi' });

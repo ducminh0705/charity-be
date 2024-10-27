@@ -1,6 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/database';
 import CharityOrganization from './CharityOrganization';
+import Expense from './Expense';
 
 class CharityCampaign extends Model {
   public id!: number;
@@ -12,6 +13,8 @@ class CharityCampaign extends Model {
   public startDate?: Date;
   public endDate?: Date;
   public status!: string;
+  public distributedAmount!: number;
+  public Expenses?: Expense[];
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -40,6 +43,12 @@ CharityCampaign.init(
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    distributedAmount: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: false,
+      defaultValue: 0,
+      field: 'distributed_amount',
     },
     goalAmount: {
       type: DataTypes.DECIMAL(15, 2),
