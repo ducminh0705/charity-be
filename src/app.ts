@@ -2,23 +2,16 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes';
-import { Sequelize } from 'sequelize';
 import donationRoutes from './routes/donationRoutes';
 import campaignRoutes from './routes/campaignRoutes';
 import reportRoutes from './routes/reportRoutes';
 import paymentInfoRoutes from './routes/paymentInfoRoutes';
 import feedbackRoutes from './routes/feedbackRoutes';
+import sequelize from './config/database';
 
-
-
-// Initialize Sequelize
-const sequelize = new Sequelize('charity', 'root', 'admin', {
-  host: 'localhost',
-  dialect: 'mysql'
-});
 
 // Sync all models
-sequelize.sync({ alter: true })
+sequelize.sync({ alter: false })
   .then(() => {
     console.log('Database & tables created!');
   })

@@ -2,6 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/database';
 import User from './User';
 import CharityCampaign from './CharityCampaign';
+import Location from './Location';
 
 class Donation extends Model {
   public id!: number;
@@ -87,6 +88,13 @@ Donation.init(
   }
 );
 
-Donation.belongsTo(User, { foreignKey: 'userId', as: 'User' });
+Donation.belongsTo(User, { foreignKey: 'donorId', as: 'User' });
+User.hasMany(Donation, { foreignKey: 'donorId' });
+
+Donation.belongsTo(CharityCampaign, { foreignKey: 'campaignId', as: 'CharityCampaign' });
+CharityCampaign.hasMany(Donation, { foreignKey: 'campaignId' });
+
+Donation.belongsTo(Location, { foreignKey: 'locationId', as: 'Location' });
+Location.hasMany(Donation, { foreignKey: 'locationId' });
 
 export default Donation;

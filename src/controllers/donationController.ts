@@ -1,79 +1,80 @@
 import { Request, Response } from 'express';
 import Donation from '../models/Donation';
-import stripe from '../services/stripeService';
 import User from '../models/User';
 import CharityCampaign from '../models/CharityCampaign';
 
-export const createDonation = async (req: Request, res: Response) => {
-  const { campaignId, amount, method } = req.body;
+export const createDonation = async (req: Request, res: Response): Promise<void> => {
+  const { campaignId, locationId, amount, method } = req.body;
   const user = (req as any).user as User;
 
   try {
     const campaign = await CharityCampaign.findByPk(campaignId);
     if (!campaign) {
-      return res.status(404).json({ message: 'Chiến dịch không tồn tại' });
+      res.status(404).json({ message: 'Chiến dịch không tồn tại' });
+      return;
     }
 
-    let donation = await Donation.create({
+    await Donation.create({
       donorId: user.id,
       campaignId,
+      locationId,
       amount,
       method,
-      status: method === 'credit_card' ? 'pending' : 'completed',
+      transactionId: null,
+      status: 'pending',
     });
+  } catch (err) {
+    res.status(500).json({ message: 'Đã xảy ra lỗi' });
+    return;
+  }
+};
 
-    if (method === 'credit_card') {
-      // Tạo Payment Intent với Stripe
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: amount * 100, // Số tiền tính bằng cent
-        currency: 'vnd',
-        metadata: { donationId: donation.id.toString() },
-      });
+export const getPendingDonation = async (req: Request, res: Response): Promise<void> => {
+  const user = (req as any).user as User;
 
-      // Lưu transaction_id (paymentIntent.id)
-      donation.transactionId = paymentIntent.id;
-      await donation.save();
+  if (user.role !== 'admin') {
+    res.status(403).json({ message: 'Bạn không có quyền truy cập' });
+    return
+  }
 
-      res.status(200).json({ clientSecret: paymentIntent.client_secret });
-    } else {
-      // Các phương thức khác, hiển thị thông tin cần thiết
-      res.status(200).json({ message: 'Vui lòng hoàn tất đóng góp của bạn' });
-    }
+  try {
+    const pendingDonations = await Donation.findAll({ where: { status: 'pending' } });
+    res.status(200).json(pendingDonations);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Đã xảy ra lỗi' });
   }
 };
 
-export const handleStripeWebhook = async (req: Request, res: Response) => {
-  const sig = req.headers['stripe-signature'] as string;
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+export const updateDonationStatus = async (req: Request, res: Response): Promise<void> => {
+  const user = (req as any).user as User;
+  const { donationId, status } = req.body;
 
-  let event;
+  if (user.role !== 'admin') {
+    res.status(403).json({ message: 'Bạn không có quyền truy cập' });
+    return;
+  }
+
+  if (!['completed', 'failed'].includes(status)) {
+    res.status(400).json({ message: 'Trạng thái không hợp lệ' });
+    return;
+  }
 
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-  } catch (err) {
-    console.error('⚠️  Webhook signature verification failed.', err.message);
-    return res.sendStatus(400);
-  }
-
-  // Xử lý sự kiện
-  if (event.type === 'payment_intent.succeeded') {
-    const paymentIntent = event.data.object as Stripe.PaymentIntent;
-    const donationId = paymentIntent.metadata.donationId;
-
-    // Cập nhật trạng thái donation
     const donation = await Donation.findByPk(donationId);
-    if (donation) {
-      donation.status = 'completed';
-      await donation.save();
+    if (!donation) {
+      res.status(404).json({ message: 'Donation không tồn tại' });
+      return;
     }
-  }
 
-  res.json({ received: true });
+    donation.status = status;
+    await donation.save();
+
+    res.status(200).json({ message: 'Cập nhật trạng thái thành công', donation });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Đã xảy ra lỗi' });
+  }
 };
 
-// Sau khi cập nhật donation thành công
-// const io = req.app.get('io');
-// io.emit('newDonation', { campaignId: donation.campaignId, amount: donation.amount });
+
