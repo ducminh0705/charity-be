@@ -15,19 +15,20 @@ export const authenticateToken = async (
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
+    console.log("No token")
     res.sendStatus(401);
     return;
   }
 
   try {
     const payload: any = jwt.verify(token, process.env.JWT_SECRET || 'your_secret_key');
+    console.log(payload.userId)
     const user = await User.findByPk(payload.userId);
 
     if (!user) {
       res.sendStatus(401);
       return;
     }
-
     req.user = user;
     next();
   } catch (err) {

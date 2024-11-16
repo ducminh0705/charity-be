@@ -7,8 +7,13 @@ import { sendOTP } from '../utils/sms';
 import CharityOrganization from '../models/CharityOrganization';
 import { Sequelize, Op } from 'sequelize';
 
-export const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { phoneNumber, password, firstName, lastName, email, role } = req.body;
+export const registerUser = async (req: Request, res: Response): Promise<void> => {
+  const { firstName, lastName, phoneNumber, email, password, role, isVerified, birthDate } = req.body;
+  
+  if (!phoneNumber) {
+    res.status(400).json({ message: 'Phone number is required' });
+    return;
+  }
   try {
     const existingUser = await User.findOne({ where: { phoneNumber } });
     if (existingUser) {
@@ -17,7 +22,8 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const additionalApproval = role === 'charity_org' ? 'PENDING' : 'NOT_NEEDED';
+    var additionalApproval;
+    role === 'charity_org' ? additionalApproval= 'PENDING' : additionalApproval = 'NOT_NEEDED';
 
     const user = await User.create({
       phoneNumber,
@@ -27,78 +33,94 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
       email,
       role,
       additionalApproval,
+      isVerified,
+      birthDate
     });
 
-    // Tạo mã OTP
-    // const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    // const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 phút
-
-    // await OTPVerification.create({ userId: user.id, otpCode, expiresAt });
-
-    // Gửi SMS
-    // await sendOTP(res, phoneNumber);
-
-    res.status(200).json({ message: 'Đã gửi mã xác minh đến số điện thoại của bạn' });
+    res.json({ 
+      message: 'Tạo tài khoản thành công ',
+      status: 200
+     });
   } catch (err) {
-    // res.status(500).json({ message: 'Đã xảy ra lỗi' });
-    next(err);
+    console.error(err);
+    res.json({ 
+      message: 'Tạo tài khoản không thành công ',
+      status: 500
+     });
+  }
+};
+
+export const registerVerifiedUser = async (req: Request, res: Response): Promise<void> => {
+  const { firstName, lastName, phoneNumber, email, password, role, isVerified, birthDate } = req.body;
+  
+  if (!phoneNumber) {
+    res.status(400).json({ message: 'Phone number is required' });
+    return;
+  }
+  try {
+    const existingUser = await User.findOne({ where: { phoneNumber } });
+    if (existingUser) {
+      // Update isVerified to true if the phone number exists
+      await existingUser.update({ isVerified: true });
+      res.json({ 
+        message: 'User is already registered; verification status updated.',
+        status: 200
+      });
+      return;
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ 
+      message: 'Verified user registration không thành công ',
+      status: 500
+     });
   }
 };
 
 export const registerCharityOrg = async (req: Request, res: Response): Promise<void> => {
   const {
     phoneNumber,
-    password,
-    firstName,
-    lastName,
-    email,
     organizationName,
-    licenseDocument,
-    birthDate,
+    licenseDocument
   } = req.body;
 
   if (
     !phoneNumber ||
-    !password ||
-    !firstName ||
-    !lastName ||
-    !email ||
     !organizationName ||
-    !licenseDocument ||
-    !birthDate
+    !licenseDocument 
   ) {
     res.status(400).json({ message: 'Missing required fields' });
     return;
   }
 
   try {
-    const existingUser = await User.findOne({
-      where: {
-        [Op.or]: [{ phoneNumber }, { email }],
-      },
-    });
+    // const existingUser = await User.findOne({
+    //   where: {
+    //     [Op.or]: [{ phoneNumber }, { email }],
+    //   },
+    // });
 
-    if (existingUser) {
-      res.status(409).json({ message: 'Phone number or email already in use' });
-      return;
-    }
+    // if (existingUser) {
+    //   res.status(409).json({ message: 'Phone number or email already in use' });
+    //   return;
+    // }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
-      phoneNumber,
-      password: hashedPassword,
-      firstName,
-      lastName,
-      email,
-      role: 'charity_org',
-      isVerified: false,
-      birthDate,
-      additionalApproval: 'PENDING',
-    });
+    // const user = await User.create({
+    //   phoneNumber,
+    //   password: hashedPassword,
+    //   firstName,
+    //   lastName,
+    //   email,
+    //   role: 'charity_org',
+    //   isVerified: false,
+    //   birthDate,
+    //   additionalApproval: 'PENDING',
+    // });
 
     const charityOrg = await CharityOrganization.create({
-      userId: user.id,
+      userPhone: phoneNumber,
       organizationName,
       licenseDocument,
       isApproved: false,
@@ -106,46 +128,12 @@ export const registerCharityOrg = async (req: Request, res: Response): Promise<v
 
     res.status(201).json({
       message: 'Charity organization registered successfully',
-      userId: user.id,
+      userPhone: phoneNumber,
       charityOrgId: charityOrg.id,
     });
   } catch (error) {
     console.error('Error registering charity organization:', error);
     res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-export const verifyOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { phoneNumber, otpCode } = req.body;
-  try {
-    const user = await User.findOne({ where: { phoneNumber } });
-    if (!user) {
-      res.status(400).json({ message: 'Người dùng không tồn tại' });
-      return;
-    }
-
-    const otpRecord = await OTPVerification.findOne({
-      where: { userId: user.id, otpCode },
-    });
-
-    if (!otpRecord) {
-      res.status(400).json({ message: 'Mã OTP không hợp lệ' });
-      return;
-    }
-    if (otpRecord.expiresAt < new Date()) {
-      res.status(400).json({ message: 'Mã OTP đã hết hạn' });
-      return;
-    }
-
-    user.isVerified = true;
-    await user.save();
-
-    // Xóa OTP sau khi sử dụng
-    await OTPVerification.destroy({ where: { userId: user.id } });
-
-    res.status(200).json({ message: 'Xác minh thành công' });
-  } catch (err) {
-    res.status(500).json({ message: 'Đã xảy ra lỗi' });
   }
 };
 
@@ -194,11 +182,12 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
       secure: true,
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+      path: '/', // Ensure the cookie is accessible in all routes
     });
 
     res.status(200).json({ accessToken, tokenType: 'Bearer' });
   } catch (err) {
-    // res.status(500).json({ message: 'Đã xảy ra lỗi' });
+    res.status(500).json({ message: 'Đã xảy ra lỗi' });
     next(err);
   }
 };
@@ -206,12 +195,12 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 export const refreshToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
-    res.sendStatus(401);
+    res.status(401).json({ message: 'Unauthorized: No refresh token provided' });
     return;
   }
 
   try {
-    const payload: any = jwt.verify(refreshToken, process.env.JWT_SECRET || 'your_secret_key');
+    const payload: any = jwt.verify(refreshToken, process.env.JWT_SECRET || 'your_secret_key')
     const user = await User.findByPk(payload.userId);
     if (!user) {
       res.sendStatus(401);
@@ -239,6 +228,34 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     role: user.role,
     isVerified: user.isVerified,
   });
+};
+
+export const getOrgNotApproval = async (req: Request, res: Response) => {
+  try {
+    const existingUser = await User.findAll({
+      where: {
+        [Op.or]: [{ additionalApproval: 'PENDING' }, {role:'charity_org'}],
+      },
+    });
+
+    const existingOrg = await CharityOrganization.findAll({
+      where: {
+        [Op.or]: [{ isApproved: 0 }],
+      },
+    });
+
+    if (existingUser && existingOrg) {
+      res.status(201).json({
+        message: 'getOrgNotApproval successfully',
+        existingUser,
+        existingOrg
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error getOrgNotApproval :', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
 

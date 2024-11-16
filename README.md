@@ -1,9 +1,11 @@
 # Charity Donation Backend
 
 ## Mô tả
+
 Hệ thống đóng góp từ thiện vùng thiên tai, cho phép người dùng đóng góp và quản lý quyên góp cho các nạn nhân bị ảnh hưởng bởi thiên tai. Hệ thống hỗ trợ nhiều phương thức thanh toán, bao gồm tiền mặt, chuyển khoản ngân hàng, ví điện tử và thẻ tín dụng.
 
 ## Tính năng
+
 - Đăng ký người dùng và xác minh qua OTP.
 - Đóng góp từ thiện qua nhiều phương thức.
 - Quản lý chiến dịch cứu trợ.
@@ -11,6 +13,7 @@ Hệ thống đóng góp từ thiện vùng thiên tai, cho phép người dùng
 - Theo dõi và báo cáo về các khoản quyên góp.
 
 ## Công nghệ sử dụng
+
 - Node.js
 - Express.js
 - TypeScript
@@ -19,38 +22,30 @@ Hệ thống đóng góp từ thiện vùng thiên tai, cho phép người dùng
 ## Hướng dẫn cài đặt
 
 ### Prerequisites
+
 - [Node.js](https://nodejs.org/) (>= 14.x)
 - [MySQL](https://www.mysql.com/)
 
-### Bước 1: Clone repository
-```bash
-git clone https://github.com/your-username/charity-donation-backend.git
-cd charity-donation-backend
-```
+### Cấu hình biến môi trường
 
-### Bước 2: Cài đặt các dependencies
-```bash
-npm install
-```
-
-### Bước 3: Cấu hình biến môi trường
-```bash
-PORT=3000
+PORT=5002
 DB_HOST=localhost
 DB_NAME=charity_db
 DB_USER=root
 DB_PASSWORD=your_db_password
-```
+TWILIO_ACCOUNT_SID = your_TWILIO_ACCOUNT_SID
+TWILIO_AUTH_TOKEN = your_TWILIO_AUTH_TOKEN
+TWILIO_CLIENT_VERIFY_V2_SERVICES = your_TWILIO_CLIENT_VERIFY_V2_SERVICES
 
-### Bước 4: Chạy ứng dụng
-# Dev mode
+### Dev mode
+
 ```bash
 npm run dev
 ```
 
-# Prd mode
+### Prd mode
+
 ```bash
 npm run build
 npm start
 ```
-

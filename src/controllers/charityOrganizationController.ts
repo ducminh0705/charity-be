@@ -5,7 +5,6 @@ import User from '../models/User';
 
 export const verifyCharityOrg = async (req: AuthRequest, res: Response): Promise<void> => {
   const user = req.user;
-
   // Kiểm tra xem người dùng đã đăng nhập và có vai trò admin hay không
   if (!user) {
     res.status(401).json({ message: 'Unauthorized' });
@@ -38,7 +37,7 @@ export const verifyCharityOrg = async (req: AuthRequest, res: Response): Promise
     await charityOrg.save();
 
     // Cập nhật additionalApproval trong bảng users thành 'APPROVED'
-    const userToUpdate = await User.findByPk(charityOrg.userId);
+    const userToUpdate = await User.findOne({ where: { phoneNumber:charityOrg.userPhone } });
 
     if (!userToUpdate) {
       res.status(404).json({ message: 'User associated with the charity organization not found' });

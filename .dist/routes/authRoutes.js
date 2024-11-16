@@ -1,12 +1,12 @@
-import { Router } from 'express';
-import { getOrgNotApproval, registerUser, registerVerifiedUser, loginUser, refreshToken, getCurrentUser, registerCharityOrg } from '../controllers/authController';
-import { authenticateToken } from '../middlewares/auth';
-import { verifyCharityOrg } from '../controllers/charityOrganizationController';
-import { sendOTP,verifyOTP } from '../utils/sms';
-
-const router = Router();
-
-router.post('/register', registerUser);
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const authController_1 = require("../controllers/authController");
+const auth_1 = require("../middlewares/auth");
+const charityOrganizationController_1 = require("../controllers/charityOrganizationController");
+const sms_1 = require("../utils/sms");
+const router = (0, express_1.Router)();
+router.post('/register', authController_1.registerUser);
 /**
  * @swagger
  * /register:
@@ -38,12 +38,9 @@ router.post('/register', registerUser);
  *       400:
  *         description: Bad request
  */
-
-router.get('/sendOTP', sendOTP);
-router.get('/verifyOTP', verifyOTP);
-router.put('/registerVerifiedUser', registerVerifiedUser); 
-router.get('/getOrgNotApproval', getOrgNotApproval); 
-
+router.get('/sendOTP', sms_1.sendOTP);
+router.get('/verifyOTP', sms_1.verifyOTP);
+router.post('/verify-otp', sms_1.verifyOTP);
 /**
  * @swagger
  * /verify-otp:
@@ -65,8 +62,7 @@ router.get('/getOrgNotApproval', getOrgNotApproval);
  *       400:
  *         description: Bad request
  */
-
-router.post('/register/charity-org', registerCharityOrg);
+router.post('/register/charity-org', authController_1.registerCharityOrg);
 /**
  * @swagger
  * /register/charity-org:
@@ -104,8 +100,7 @@ router.post('/register/charity-org', registerCharityOrg);
  *       400:
  *         description: Bad request
  */
-
-router.patch('/verify/:organizationID', authenticateToken, verifyCharityOrg);
+router.patch('/verify/:organizationID', auth_1.authenticateToken, charityOrganizationController_1.verifyCharityOrg);
 /**
  * @swagger
  * /verify/{organizationID}:
@@ -131,8 +126,7 @@ router.patch('/verify/:organizationID', authenticateToken, verifyCharityOrg);
  *       403:
  *         description: Forbidden
  */
-
-router.post('/login', loginUser);
+router.post('/login', authController_1.loginUser);
 /**
  * @swagger
  * /login:
@@ -156,8 +150,7 @@ router.post('/login', loginUser);
  *       400:
  *         description: Bad request
  */
-router.post('/refresh-token', refreshToken);
-
+router.post('/refresh-token', authController_1.refreshToken);
 /**
  * @swagger
  * /me:
@@ -172,6 +165,5 @@ router.post('/refresh-token', refreshToken);
  *       400:
  *         description: Bad request
  */
-router.get('/me', authenticateToken, getCurrentUser);
-
-export default router;
+router.get('/me', auth_1.authenticateToken, authController_1.getCurrentUser);
+exports.default = router;

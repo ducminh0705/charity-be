@@ -11,6 +11,11 @@ const PORT = process.env.PORT || 3000;
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+app.use('/test', (req, res) => {
+  res.json({ message: 'Hello, World!' });
+});
+
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {

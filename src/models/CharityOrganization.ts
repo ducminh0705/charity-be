@@ -4,7 +4,7 @@ import User from './User';
 
 class CharityOrganization extends Model {
   public id!: number;
-  public userId!: number;
+  public userPhone!: number;
   public organizationName!: string;
   public licenseDocument!: string;
   public isApproved!: boolean;
@@ -19,14 +19,14 @@ CharityOrganization.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    userId: {
-      type: DataTypes.INTEGER.UNSIGNED,
+    userPhone: {
+      type: DataTypes.STRING(20),
       allowNull: false,
       unique: true,
-      field: 'user_id',
+      field: 'phone_number',
       references: {
         model: 'users',
-        key: 'id',
+        key: 'phone_number',
       },
     },
     organizationName: {
@@ -62,7 +62,7 @@ CharityOrganization.init(
   }
 );
 
-CharityOrganization.belongsTo(User, { foreignKey: 'userId' });
-User.hasOne(CharityOrganization, { foreignKey: 'userId' });
+CharityOrganization.belongsTo(User, { foreignKey: 'userPhone' });
+User.hasOne(CharityOrganization, { foreignKey: 'userPhone' });
 
 export default CharityOrganization;
