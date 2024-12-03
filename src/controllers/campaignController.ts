@@ -6,7 +6,6 @@ import { AuthRequest } from '../middlewares/auth';
 import User from '../models/User';
 import Donation from '../models/Donation';
 
-
 export const createCampaign = async (req: AuthRequest, res: Response): Promise<void> => {
   const user = req.user;
 
@@ -22,12 +21,12 @@ export const createCampaign = async (req: AuthRequest, res: Response): Promise<v
   }
 
   const { title, description, goalAmount, startDate, endDate, locations } = req.body;
-
+ 
   try {
     let charityOrgId = null;
 
     if (user.role === 'charity_org') {
-      const charityOrg = await CharityOrganization.findOne({ where: { userId: user.id } });
+      const charityOrg = await CharityOrganization.findOne({ where: { userPhone: user.phoneNumber } });
       if (!charityOrg) {
         res.status(400).json({ message: 'Người dùng không liên kết với bất kỳ tổ chức từ thiện nào' });
         return;
@@ -105,7 +104,7 @@ export const updateCampaign = async (req: AuthRequest, res: Response): Promise<v
     }
 
     if (user.role === 'charity_org') {
-      const charityOrg = await CharityOrganization.findOne({ where: { userId: user.id } });
+      const charityOrg = await CharityOrganization.findOne({ where: { userPhone: user.phoneNumber  } });
       if (!charityOrg || charityOrg.id !== campaign.charityOrgId) {
         res.status(403).json({ message: 'Bạn không có quyền cập nhật chiến dịch này' });
         return;
@@ -279,7 +278,7 @@ export const deleteCampaign = async (req: AuthRequest, res: Response): Promise<v
     }
 
     if (user.role === 'charity_org') {
-      const charityOrg = await CharityOrganization.findOne({ where: { userId: user.id } });
+      const charityOrg = await CharityOrganization.findOne({ where: { userPhone: user.phoneNumber  } });
       if (!charityOrg || charityOrg.id !== campaign.charityOrgId) {
         res.status(403).json({ message: 'Bạn không có quyền xóa chiến dịch này' });
         return;
