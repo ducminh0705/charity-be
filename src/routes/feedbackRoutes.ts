@@ -5,7 +5,7 @@ import { authenticateToken } from '../middlewares/auth';
 const router = Router();
 
 // Gửi phản hồi (cần xác thực)
-// router.post('/', authenticateToken, createFeedback);
+router.post('/create', authenticateToken, createFeedback);
 
 // Lấy danh sách phản hồi
 router.get('/', getFeedbacks);
