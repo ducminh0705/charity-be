@@ -24,7 +24,8 @@ export const createDonation = async (req: Request, res: Response): Promise<void>
       status: 'pending',
     });
 
-    campaign.currentAmount = campaign.currentAmount + amount;
+    campaign.currentAmount = Number.parseInt(campaign.currentAmount?.toString() || '0') + Number.parseInt(amount);
+    console.log(campaign.currentAmount);
     await campaign.save();
 
     res.status(201).json({ message: 'Đóng góp thành công' });
