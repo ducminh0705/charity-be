@@ -24,10 +24,6 @@ export const createDonation = async (req: Request, res: Response): Promise<void>
       status: 'pending',
     });
 
-    campaign.currentAmount = Number.parseInt(campaign.currentAmount?.toString() || '0') + Number.parseInt(amount);
-    console.log(campaign.currentAmount);
-    await campaign.save();
-
     res.status(201).json({ message: 'Đóng góp thành công' });
   } catch (err) {
     res.status(500).json({ message: 'Đã xảy ra lỗi' });
@@ -82,6 +78,14 @@ export const updateDonationStatus = async (req: Request, res: Response): Promise
 
     donation.status = status;
     await donation.save();
+
+    if (status === 'completed') {
+      const campaign = await CharityCampaign.findByPk(donation.campaignId);
+      if (campaign) {
+        campaign.currentAmount = Number.parseInt(campaign.currentAmount?.toString() || '0') + Number.parseInt(donation.amount.toString());
+        await campaign.save();
+      }
+    }
 
     res.status(200).json({ message: 'Cập nhật trạng thái thành công', donation });
   } catch (err) {

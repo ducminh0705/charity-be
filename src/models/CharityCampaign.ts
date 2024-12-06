@@ -14,6 +14,7 @@ class CharityCampaign extends Model {
   public endDate?: Date;
   public status!: string;
   public distributedAmount!: number;
+  public url?: string;
   public Expenses?: Expense[];
 
   public readonly createdAt!: Date;
@@ -73,6 +74,10 @@ CharityCampaign.init(
     status: {
       type: DataTypes.ENUM('pending', 'active', 'completed', 'cancelled'),
       defaultValue: 'pending',
+    },
+    url: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,

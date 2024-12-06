@@ -141,6 +141,9 @@ router.get('/', getCampaigns);
  *               charityOrgId:
  *                 type: integer
  *                 description: ID của tổ chức từ thiện (chỉ dành cho admin)
+ *               url:
+ *                 type: string
+ *                 description: URL của chiến dịch
  *               locations:
  *                 type: array
  *                 items:
@@ -234,6 +237,9 @@ router.post('/create', authenticateToken, createCampaign);
  *                 type: string
  *                 description: Trạng thái của chiến dịch
  *                 enum: [pending, active, completed, cancelled]
+ *               url:
+ *                 type: string
+ *                 description: URL của chiến dịch
  *               locations:
  *                 type: array
  *                 items:
@@ -477,6 +483,8 @@ router.patch('/update-status/:id', authenticateToken, updateCampaignStatus);
  *                 id:
  *                   type: string
  *                 name:
+ *                   type: string
+ *                 url:
  *                   type: string
  *                 description:
  *                   type: string

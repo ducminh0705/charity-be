@@ -20,7 +20,7 @@ export const createCampaign = async (req: AuthRequest, res: Response): Promise<v
     return;
   }
 
-  const { title, description, goalAmount, startDate, endDate, locations } = req.body;
+  const { title, description, goalAmount, startDate, endDate, locations, url } = req.body;
  
   try {
     let charityOrgId = null;
@@ -50,6 +50,7 @@ export const createCampaign = async (req: AuthRequest, res: Response): Promise<v
       startDate,
       endDate,
       status: 'pending',
+      url,
     });
 
     // Nếu có danh sách locations, tạo các location
@@ -112,13 +113,14 @@ export const updateCampaign = async (req: AuthRequest, res: Response): Promise<v
     }
 
     // Cập nhật campaign
-    const { title, description, goalAmount, startDate, endDate, status, locations } = req.body;
+    const { title, description, goalAmount, startDate, endDate, status, locations, url } = req.body;
 
     campaign.title = title || campaign.title;
     campaign.description = description || campaign.description;
     campaign.goalAmount = goalAmount || campaign.goalAmount;
     campaign.startDate = startDate || campaign.startDate;
     campaign.endDate = endDate || campaign.endDate;
+    campaign.url = url || campaign.url;
 
     // Chỉ admin mới có thể cập nhật status
     if (user.role === 'admin' && status) {
