@@ -167,7 +167,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     const accessToken = jwt.sign(
       { userId: user.id },
       process.env.JWT_SECRET || 'secret_key',
-      { expiresIn: `${process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 15}m` }
+      { expiresIn: `${process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 7}d` }
     );
 
     const refreshToken = jwt.sign(
@@ -179,7 +179,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     // Lưu refreshToken vào cookie HTTP-only
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
+      // secure: true,
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
       path: '/', // Ensure the cookie is accessible in all routes
@@ -193,29 +193,42 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 };
 
 export const refreshToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const refreshToken = req.cookies.refreshToken;
+  const refreshToken = req.cookies?.refreshToken;
+
   if (!refreshToken) {
     res.status(401).json({ message: 'Unauthorized: No refresh token provided' });
     return;
   }
 
   try {
-    const payload: any = jwt.verify(refreshToken, process.env.JWT_SECRET || 'your_secret_key')
+    const secretKey = process.env.JWT_SECRET || 'your_secret_key';
+
+    // Verify the refresh token
+    const payload: any = jwt.verify(refreshToken, secretKey);
+    
+    // Fetch the user
     const user = await User.findByPk(payload.userId);
     if (!user) {
-      res.sendStatus(401);
+      res.status(401).json({ message: 'Unauthorized: User not found' });
       return;
     }
 
-    const newAccessToken = jwt.sign(
+    // Generate a new access token
+    const accessToken = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET || 'your_secret_key',
+      secretKey,
       { expiresIn: `${process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 15}m` }
     );
 
-    res.status(200).json({ accessToken: newAccessToken, tokenType: 'Bearer' });
-  } catch (err) {
-    res.sendStatus(401);
+    res.status(200).json({ accessToken, tokenType: 'Bearer' });
+  } catch (err: any) {
+    if (err.name === 'TokenExpiredError') {
+      res.status(401).json({ message: 'Unauthorized: Refresh token expired' });
+    } else if (err.name === 'JsonWebTokenError') {
+      res.status(401).json({ message: 'Unauthorized: Invalid token' });
+    } else {
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
   }
 };
 

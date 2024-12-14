@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Donation from '../models/Donation';
 import User from '../models/User';
 import CharityCampaign from '../models/CharityCampaign';
+import Location from '../models/Location';
 
 export const createDonation = async (req: Request, res: Response): Promise<void> => {
   const { campaignId, locationId, amount, method } = req.body;
@@ -84,6 +85,12 @@ export const updateDonationStatus = async (req: Request, res: Response): Promise
       if (campaign) {
         campaign.currentAmount = Number.parseInt(campaign.currentAmount?.toString() || '0') + Number.parseInt(donation.amount.toString());
         await campaign.save();
+      }
+
+      const location = await Location.findByPk(donation.locationId);
+      if (location) {
+        location.currentAmount = Number.parseInt(location.currentAmount?.toString() || '0') + Number.parseInt(donation.amount.toString());
+        await location.save();
       }
     }
 

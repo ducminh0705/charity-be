@@ -51,7 +51,6 @@ export const getDonationsReport = async (req: Request, res: Response): Promise<v
           include: [
             {
               model: CharityOrganization,
-              as: 'charityOrganization',
               attributes: ['id', 'organizationName'],
               include: [
                 {
@@ -111,7 +110,6 @@ export const getExpensesReport = async (req: Request, res: Response): Promise<vo
           include: [
             {
               model: CharityOrganization,
-              as: 'charityOrganization',
               attributes: ['id', 'organizationName'],
               include: [
                 {

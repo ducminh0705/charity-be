@@ -22,8 +22,8 @@ export const createExpense = async (req: AuthRequest, res: Response): Promise<vo
     }
 
     // Kiểm tra số dư có đủ để chi tiêu không
-    const totalDonations = campaign.currentAmount ?? 0;
-    const totalExpenses = campaign.distributedAmount ?? 0;
+    const totalDonations = Number.parseInt(campaign.currentAmount?.toString() || '0');
+    const totalExpenses = Number.parseInt(campaign.distributedAmount?.toString() || '0');
     const remainingBalance = totalDonations - totalExpenses;
 
     if (amount > remainingBalance) {
@@ -38,7 +38,8 @@ export const createExpense = async (req: AuthRequest, res: Response): Promise<vo
     });
 
     // Cập nhật distributedAmount trong CharityCampaign
-    campaign.distributedAmount = campaign.distributedAmount + amount;
+    campaign.distributedAmount = Number.parseInt(campaign.distributedAmount?.toString() || '0') + Number.parseInt(amount);
+    console.log(campaign.distributedAmount);
     await campaign.save();
 
     res.status(201).json({ message: 'Ghi nhận chi tiêu thành công', expense });
