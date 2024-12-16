@@ -21,9 +21,11 @@ Hệ thống đóng góp từ thiện vùng thiên tai, cho phép người dùng
 
 ## Hướng dẫn cài đặt
 
+- npm install
+
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (>= 14.x)
+- [Node.js](https://nodejs.org/) (v20.14.0)
 - [MySQL](https://www.mysql.com/)
 
 ### Cấu hình biến môi trường
@@ -36,6 +38,7 @@ DB_PASSWORD=your_db_password
 TWILIO_ACCOUNT_SID = your_TWILIO_ACCOUNT_SID
 TWILIO_AUTH_TOKEN = your_TWILIO_AUTH_TOKEN
 TWILIO_CLIENT_VERIFY_V2_SERVICES = your_TWILIO_CLIENT_VERIFY_V2_SERVICES
+JWT_SECRET= 'your_JWT_SECRET'
 
 ### Dev mode
 
